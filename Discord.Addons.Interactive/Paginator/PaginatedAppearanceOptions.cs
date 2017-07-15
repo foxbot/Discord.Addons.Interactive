@@ -15,7 +15,7 @@ namespace Discord.Addons.Interactive
         public IEmote Info = new Emoji("ℹ");
 
         public string FooterFormat = "Page {0}/{1}";
-        public string InformationText = "todo: write info";
+        public string InformationText = "This is a paginator. React with the respective icons to change page.";
 
         public JumpDisplayOptions JumpDisplayOptions = JumpDisplayOptions.WithManageMessages;
         public bool DisplayInformationIcon = true;

@@ -12,7 +12,6 @@ namespace Discord.Addons.Interactive
         TimeSpan? Timeout { get; }
         SocketCommandContext Context { get; }
 
-        Task DisplayAsync();
         Task<bool> HandleCallbackAsync(SocketReaction reaction);
     }
 }
