@@ -63,6 +63,15 @@ namespace Discord.Addons.Interactive
                 if (options.DisplayInformationIcon)
                     await message.AddReactionAsync(options.Info);
             });
+            // TODO: (Next major version) timeouts need to be handled at the service-level!
+            if (Timeout.HasValue && Timeout.Value != null)
+            {
+                _ = Task.Delay(Timeout.Value).ContinueWith(_ =>
+                {
+                    Interactive.RemoveReactionCallback(message);
+                    _ = Message.DeleteAsync();
+                });
+            }
         }
 
         public async Task<bool> HandleCallbackAsync(SocketReaction reaction)
