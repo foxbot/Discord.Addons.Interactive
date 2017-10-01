@@ -4,6 +4,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Discord.Addons.Interactive
 {
@@ -23,20 +24,23 @@ namespace Discord.Addons.Interactive
             _defaultTimeout = defaultTimeout ?? TimeSpan.FromSeconds(15);
         }
 
-        public Task<SocketMessage> NextMessageAsync(SocketCommandContext context, bool fromSourceUser = true, bool inSourceChannel = true, TimeSpan? timeout = null)
+        public Task<SocketMessage> NextMessageAsync(SocketCommandContext context, bool fromSourceUser = true, bool inSourceChannel = true, TimeSpan? timeout = null, CancellationToken token = default(CancellationToken))
         {
             var criterion = new Criteria<SocketMessage>();
             if (fromSourceUser)
                 criterion.AddCriterion(new EnsureSourceUserCriterion());
             if (inSourceChannel)
                 criterion.AddCriterion(new EnsureSourceChannelCriterion());
-            return NextMessageAsync(context, criterion, timeout);
+            return NextMessageAsync(context, criterion, timeout, token);
         }
-        public async Task<SocketMessage> NextMessageAsync(SocketCommandContext context, ICriterion<SocketMessage> criterion, TimeSpan? timeout = null)
+        public async Task<SocketMessage> NextMessageAsync(SocketCommandContext context, ICriterion<SocketMessage> criterion, TimeSpan? timeout = null, CancellationToken token = default(CancellationToken))
         {
             timeout = timeout ?? _defaultTimeout;
 
             var eventTrigger = new TaskCompletionSource<SocketMessage>();
+            var cancelTrigger = new TaskCompletionSource<bool>();
+
+            token.Register(() => cancelTrigger.SetResult(true));
 
             async Task Handler(SocketMessage message)
             {
@@ -46,10 +50,11 @@ namespace Discord.Addons.Interactive
             }
 
             context.Client.MessageReceived += Handler;
-            
+
             var trigger = eventTrigger.Task;
+            var cancel = cancelTrigger.Task;
             var delay = Task.Delay(timeout.Value);
-            var task = await Task.WhenAny(trigger, delay).ConfigureAwait(false);
+            var task = await Task.WhenAny(trigger, delay, cancel).ConfigureAwait(false);
 
             context.Client.MessageReceived -= Handler;
 
