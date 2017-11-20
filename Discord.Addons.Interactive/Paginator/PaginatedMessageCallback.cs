@@ -109,7 +109,7 @@ namespace Discord.Addons.Interactive
                         .AddCriterion(new EnsureIsIntegerCriterion());
                     var response = await Interactive.NextMessageAsync(Context, criteria, TimeSpan.FromSeconds(15));
                     var request = int.Parse(response.Content);
-                    if (request <= 1 || request >= pages)
+                    if (request < 1 || request > pages)
                     {
                         _ = response.DeleteAsync().ConfigureAwait(false);
                         await Interactive.ReplyAndDeleteAsync(Context, options.Stop.Name);
