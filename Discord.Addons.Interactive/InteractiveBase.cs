@@ -41,6 +41,9 @@ namespace Discord.Addons.Interactive
         public Task<IUserMessage> PagedReplyAsync(PaginatedMessage pager, ICriterion<SocketReaction> criterion)
             => Interactive.SendPaginatedMessageAsync(Context, pager, criterion);
 
+        public Task<IUserMessage> InlineReactionReplyAsync(ReactionCallbackData data, bool fromSourceUser = true)
+            => Interactive.SendMessageWithReactionCallbacksAsync(Context, data, fromSourceUser);
+
         public RuntimeResult Ok(string reason = null) => new OkResult(reason);
     }
 }
