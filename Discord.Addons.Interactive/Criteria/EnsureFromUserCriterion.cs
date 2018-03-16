@@ -6,8 +6,9 @@ namespace Discord.Addons.Interactive
     public class EnsureFromUserCriterion : ICriterion<IMessage>
     {
         private readonly ulong _id;
-        public EnsureFromUserCriterion(ulong id)
-            => _id = id;
+
+        public EnsureFromUserCriterion(IUser user)
+            => _id = user.Id;
 
         public Task<bool> JudgeAsync(SocketCommandContext sourceContext, IMessage parameter)
         {
