@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.ComponentModel;
+using System.Threading.Tasks;
 using Discord.Commands;
 
 namespace Discord.Addons.Interactive
@@ -9,6 +10,10 @@ namespace Discord.Addons.Interactive
 
         public EnsureFromUserCriterion(IUser user)
             => _id = user.Id;
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public EnsureFromUserCriterion(ulong id)
+            => _id = id;
 
         public Task<bool> JudgeAsync(SocketCommandContext sourceContext, IMessage parameter)
         {
