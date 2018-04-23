@@ -132,13 +132,22 @@ namespace Discord.Addons.Interactive
         
         protected Embed BuildEmbed()
         {
-            return new EmbedBuilder()
-                .WithAuthor(_pager.Author)
-                .WithColor(_pager.Color)
-                .WithDescription(_pager.Pages.ElementAt(page-1).ToString())
+            var p = _pager.Pages.ElementAt(page - 1);
+
+            var embed = new EmbedBuilder()
+                .WithAuthor(p.Author ?? _pager.Author)
+                .WithColor(p.Color)
+                .WithDescription(p.Description ?? "null")
                 .WithFooter(f => f.Text = string.Format(options.FooterFormat, page, pages))
-                .WithTitle(_pager.Title)
-                .Build();
+                .WithTitle(p.Title ?? _pager.Title);
+
+            if (p.ImageUrl != null)
+                embed.WithImageUrl(p.ImageUrl);
+
+            if (p.ThumbnailUrl != null)
+                embed.WithThumbnailUrl(p.ThumbnailUrl);
+
+            return embed.Build();
         }
         private async Task RenderAsync()
         {

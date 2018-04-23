@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Discord.Addons.Interactive;
+using Discord.Addons.Interactive.Paginator;
 using Discord.Commands;
 
 namespace SampleApp.Modules
@@ -37,7 +38,14 @@ namespace SampleApp.Modules
         [Command("paginator")]
         public async Task Test_Paginator()
         {
-            var pages = new[] { "Page 1", "Page 2", "Page 3", "aaaaaa", "Page 5" };
+            var pages = new[] 
+            {
+                new PaginatedMessageContent { Description = "Page 1" },
+                new PaginatedMessageContent { Description = "Page 2" },
+                new PaginatedMessageContent { Description = "Page 3" },
+                new PaginatedMessageContent { Description = "aaaaaa" },
+                new PaginatedMessageContent { Description = "Page 5"}
+            };
             await PagedReplyAsync(pages);
         }
     }
