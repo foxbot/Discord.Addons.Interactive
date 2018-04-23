@@ -1,4 +1,4 @@
-﻿namespace Discord.Addons.Interactive.Paginator
+﻿namespace Discord.Addons.Interactive
 {
     public class PaginatedMessageContent
     {

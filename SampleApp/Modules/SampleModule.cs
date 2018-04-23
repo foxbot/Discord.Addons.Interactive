@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Discord.Addons.Interactive;
-using Discord.Addons.Interactive.Paginator;
 using Discord.Commands;
 
 namespace SampleApp.Modules

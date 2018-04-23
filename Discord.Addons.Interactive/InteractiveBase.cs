@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Discord.Addons.Interactive.Paginator;
 using Discord.Commands;
 using Discord.WebSocket;
 
