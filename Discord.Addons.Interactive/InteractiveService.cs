@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.WebSocket;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Discord.Addons.Interactive
 {
@@ -46,7 +45,7 @@ namespace Discord.Addons.Interactive
             }
 
             context.Client.MessageReceived += Handler;
-            
+
             var trigger = eventTrigger.Task;
             var delay = Task.Delay(timeout.Value);
             var task = await Task.WhenAny(trigger, delay).ConfigureAwait(false);
@@ -76,6 +75,16 @@ namespace Discord.Addons.Interactive
             return callback.Message;
         }
 
+        public async Task<IUserMessage> SendMessageWithReactionCallbacksAsync(SocketCommandContext context, ReactionCallbackData callbacks, bool fromSourceUser = true)
+        {
+            var criterion = new Criteria<SocketReaction>();
+            if(fromSourceUser)
+                criterion.AddCriterion(new EnsureReactionFromSourceUserCriterion());
+            var callback = new InlineReactionCallback(this, context, callbacks, criterion);
+            await callback.DisplayAsync().ConfigureAwait(false);
+            return callback.Message;
+        }
+
         public void AddReactionCallback(IMessage message, IReactionCallback callback)
             => _callbacks[message.Id] = callback;
         public void RemoveReactionCallback(IMessage message)
@@ -84,7 +93,7 @@ namespace Discord.Addons.Interactive
             => _callbacks.Remove(id);
         public void ClearReactionCallbacks()
             => _callbacks.Clear();
-        
+
         private async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
         {
             if (reaction.UserId == Discord.CurrentUser.Id) return;

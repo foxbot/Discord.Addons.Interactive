@@ -1,7 +1,8 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
+using System;
+using System.Threading.Tasks;
 
 namespace SampleApp.Modules
 {
@@ -39,6 +40,36 @@ namespace SampleApp.Modules
         {
             var pages = new[] { "Page 1", "Page 2", "Page 3", "aaaaaa", "Page 5" };
             await PagedReplyAsync(pages);
+        }
+
+        // InlineReactionReplyAsync will send a message and adds reactions on it.
+        // Once an user adds a reaction, the callback is fired.
+        // If callback was successfull next callback is not handled (message is unsubscribed).
+        // Unsuccessful callback is a reaction that did not have a callback.
+        [Command("reaction")]
+        public async Task Test_ReactionReply()
+        {
+            await InlineReactionReplyAsync(new ReactionCallbackData("text")
+                .WithCallback(new Emoji("👍"), c => c.Channel.SendMessageAsync("You've replied with 👍"))
+                .WithCallback(new Emoji("👎"), c => c.Channel.SendMessageAsync("You've replied with 👎"))
+                );
+        }
+        [Command("embedreaction")]
+        public async Task Test_EmedReactionReply()
+        {
+            var one = new Emoji("1⃣");
+            var two = new Emoji("2⃣");
+
+            var embed = new EmbedBuilder()
+                .WithTitle("Choose one")
+                .AddInlineField(one.Name, "Beer")
+                .AddInlineField(two.Name, "Drink")
+                .Build();
+
+            await InlineReactionReplyAsync(new ReactionCallbackData("text", embed)
+                .WithCallback(one, c => c.Channel.SendMessageAsync("Here you go :beer:"))
+                .WithCallback(two, c => c.Channel.SendMessageAsync("Here you go :tropical_drink:"))
+                );
         }
     }
 }
