@@ -18,8 +18,8 @@ namespace Discord.Addons.Interactive
 
         public IUserMessage Message { get; private set; }
 
-        readonly InteractiveService interactive;
-        readonly ReactionCallbackData data;
+        private readonly InteractiveService _interactive;
+        private readonly ReactionCallbackData _data;
 
         public InlineReactionCallback(
             InteractiveService interactive,
@@ -27,35 +27,35 @@ namespace Discord.Addons.Interactive
             ReactionCallbackData data,
             ICriterion<SocketReaction> criterion = null)
         {
-            this.interactive = interactive;
+            _interactive = interactive;
             Context = context;
-            this.data = data;
+            _data = data;
             Criterion = criterion ?? new EmptyCriterion<SocketReaction>();
             Timeout = data.Timeout ?? TimeSpan.FromSeconds(30);
         }
 
         public async Task DisplayAsync()
         {
-            var message = await Context.Channel.SendMessageAsync(data.Text, embed: data.Embed).ConfigureAwait(false);
+            var message = await Context.Channel.SendMessageAsync(_data.Text, embed: _data.Embed).ConfigureAwait(false);
             Message = message;
-            interactive.AddReactionCallback(message, this);
+            _interactive.AddReactionCallback(message, this);
 
             _ = Task.Run(async () =>
             {
-                foreach (var item in data.Callbacks)
+                foreach (var item in _data.Callbacks)
                     await message.AddReactionAsync(item.Reaction);
             });
 
             if (Timeout.HasValue)
             {
                 _ = Task.Delay(Timeout.Value)
-                    .ContinueWith(_ => interactive.RemoveReactionCallback(message));
+                    .ContinueWith(_ => _interactive.RemoveReactionCallback(message));
             }
         }
 
         public async Task<bool> HandleCallbackAsync(SocketReaction reaction)
         {
-            var reactionCallbackItem = data.Callbacks.FirstOrDefault(t => t.Reaction.Equals(reaction.Emote));
+            var reactionCallbackItem = _data.Callbacks.FirstOrDefault(t => t.Reaction.Equals(reaction.Emote));
             if (reactionCallbackItem == null)
                 return false;
 
