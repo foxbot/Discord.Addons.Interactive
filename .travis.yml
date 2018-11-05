@@ -1,0 +1,10 @@
+language: csharp
+mono: none
+dotnet: 2.1.403
+python: 3.6
+script: python script/build.py
+deploy:
+  provider: script
+  script: python script/deploy.py
+  on:
+    branch: master
