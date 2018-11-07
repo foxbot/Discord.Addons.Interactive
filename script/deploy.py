@@ -1,4 +1,4 @@
-from subprocess import run
+from subprocess import call
 from os import environ as env
 
 
@@ -6,11 +6,9 @@ def pack(projects, version, tag):
     print("---: Packing projects...")
     for project in projects:
         print(f"---: Packing {project}")
-        cmd = run(
+        if call(
             f"dotnet pack {project} /p:BuildNumber={version} /p:IsTagBuild={tag}",
-            shell=True)
-
-        if cmd.returncode != 0:
+                shell=True) != 0:
             print(f"---: Failed to pack {project}!")
             exit(1)
         print(f"---: Packed {project}.")
