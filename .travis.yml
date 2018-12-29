@@ -1,0 +1,20 @@
+language: csharp
+mono: none
+dotnet: 2.1.502
+env:
+  - DOTNET_CLI_TELEMETRY_OPTOUT=1
+install:
+  - dotnet restore
+script:
+  - dotnet build -c "Release"
+deploy:
+  - provider: script
+    script: "chmod +x ./deploy.sh && ./deploy.sh"
+    on:
+      branch: master
+    skip_cleanup: true
+  - provider: script
+    script: "chmod +x ./deploy.sh && ./deploy.sh"
+    on:
+      tags: true
+    skip_cleanup: true
