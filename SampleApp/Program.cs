@@ -39,7 +39,7 @@ namespace SampleApp
                 .BuildServiceProvider();
 
             commands = new CommandService();
-            await commands.AddModulesAsync(Assembly.GetEntryAssembly());
+            await commands.AddModulesAsync(Assembly.GetEntryAssembly(), services);
 
             client.MessageReceived += HandleCommandAsync;
 
