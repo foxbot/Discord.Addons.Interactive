@@ -10,6 +10,6 @@ fi
 
 mkdir "./artifacts"
 
-dotnet pack "./src/Discord.Addons.EventQueue/Discord.Addons.EventQueue.csproj" -c "Release" -o "$(pwd)/artifacts/" /p:Version=$VERSION
+dotnet pack "./Discord.Addons.Interactive/Discord.Addons.Interactive.csproj" -c "Release" -o "$(pwd)/artifacts/" /p:Version=$VERSION
 
 dotnet nuget push "./artifacts/*" -s $MYGET_SOURCE -k $MYGET_KEY
