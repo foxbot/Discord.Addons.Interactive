@@ -9,6 +9,7 @@
     <PackageTags>discord;discord.net</PackageTags>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>git://github.com/foxbot/Discord.Addons.Interactive</RepositoryUrl>
+    <PackageIconUrl>https://github.com/foxbot/Discord.Addons.Interactive/raw/master/marketing/PackageLogo.png</PackageIconUrl>
 
     <VersionPrefix Condition=" '$(Version)' != '' ">$(Version)</VersionPrefix>
     <VersionPrefix Condition=" '$(Version)' == '' ">0.0.0-dev</VersionPrefix>
