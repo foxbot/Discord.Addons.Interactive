@@ -10,12 +10,12 @@ namespace Discord.Addons.Interactive
 {
     public class InteractiveService : IDisposable
     {
-        public DiscordSocketClient Discord { get; }
+        public BaseSocketClient Discord { get; }
 
         private Dictionary<ulong, IReactionCallback> _callbacks;
         private TimeSpan _defaultTimeout;
 
-        public InteractiveService(DiscordSocketClient discord, TimeSpan? defaultTimeout = null)
+        public InteractiveService(BaseSocketClient discord, TimeSpan? defaultTimeout = null)
         {
             Discord = discord;
             Discord.ReactionAdded += HandleReactionAsync;
@@ -24,7 +24,11 @@ namespace Discord.Addons.Interactive
             _defaultTimeout = defaultTimeout ?? TimeSpan.FromSeconds(15);
         }
 
-        public Task<SocketMessage> NextMessageAsync(SocketCommandContext context, bool fromSourceUser = true, bool inSourceChannel = true, TimeSpan? timeout = null, CancellationToken token = default(CancellationToken))
+        public Task<SocketMessage> NextMessageAsync(SocketCommandContext context, 
+            bool fromSourceUser = true, 
+            bool inSourceChannel = true, 
+            TimeSpan? timeout = null,
+            CancellationToken token = default(CancellationToken))
         {
             var criterion = new Criteria<SocketMessage>();
             if (fromSourceUser)
@@ -33,7 +37,11 @@ namespace Discord.Addons.Interactive
                 criterion.AddCriterion(new EnsureSourceChannelCriterion());
             return NextMessageAsync(context, criterion, timeout, token);
         }
-        public async Task<SocketMessage> NextMessageAsync(SocketCommandContext context, ICriterion<SocketMessage> criterion, TimeSpan? timeout = null, CancellationToken token = default(CancellationToken))
+        
+        public async Task<SocketMessage> NextMessageAsync(SocketCommandContext context, 
+            ICriterion<SocketMessage> criterion, 
+            TimeSpan? timeout = null,
+            CancellationToken token = default(CancellationToken))
         {
             timeout = timeout ?? _defaultTimeout;
 
@@ -64,7 +72,11 @@ namespace Discord.Addons.Interactive
                 return null;
         }
 
-        public async Task<IUserMessage> ReplyAndDeleteAsync(SocketCommandContext context, string content, bool isTTS = false, Embed embed = null, TimeSpan? timeout = null, RequestOptions options = null)
+        public async Task<IUserMessage> ReplyAndDeleteAsync(SocketCommandContext context, 
+            string content, bool isTTS = false, 
+            Embed embed = null, 
+            TimeSpan? timeout = null, 
+            RequestOptions options = null)
         {
             timeout = timeout ?? _defaultTimeout;
             var message = await context.Channel.SendMessageAsync(content, isTTS, embed, options).ConfigureAwait(false);
@@ -74,7 +86,9 @@ namespace Discord.Addons.Interactive
             return message;
         }
 
-        public async Task<IUserMessage> SendPaginatedMessageAsync(SocketCommandContext context, PaginatedMessage pager, ICriterion<SocketReaction> criterion = null)
+        public async Task<IUserMessage> SendPaginatedMessageAsync(SocketCommandContext context, 
+            PaginatedMessage pager, 
+            ICriterion<SocketReaction> criterion = null)
         {
             var callback = new PaginatedMessageCallback(this, context, pager, criterion);
             await callback.DisplayAsync().ConfigureAwait(false);
@@ -90,7 +104,9 @@ namespace Discord.Addons.Interactive
         public void ClearReactionCallbacks()
             => _callbacks.Clear();
         
-        private async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
+        private async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> message, 
+            ISocketMessageChannel channel, 
+            SocketReaction reaction)
         {
             if (reaction.UserId == Discord.CurrentUser.Id) return;
             if (!(_callbacks.TryGetValue(message.Id, out var callback))) return;

@@ -1,20 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.1</TargetFramework>
-    <Version>1.0.1</Version>
     <Authors>foxbot</Authors>
     
     <PackageId>Discord.Addons.Interactive</PackageId>
     <PackageLicenseUrl>https://opensource.org/licenses/isc</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/foxbot/Discord.Addons.Interactive</PackageProjectUrl>
     <PackageTags>discord;discord.net</PackageTags>
-    
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>git://github.com/foxbot/Discord.Addons.Interactive</RepositoryUrl>
+    <PackageIconUrl>https://github.com/foxbot/Discord.Addons.Interactive/raw/master/marketing/PackageLogo.png</PackageIconUrl>
+
+    <VersionPrefix Condition=" '$(Version)' != '' ">$(Version)</VersionPrefix>
+    <VersionPrefix Condition=" '$(Version)' == '' ">0.0.0-dev</VersionPrefix>
+
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Discord.Net.Commands" Version="1.0.1" />
-    <PackageReference Include="Discord.Net.WebSocket" Version="1.0.1" />
+    <PackageReference Include="Discord.Net.Commands" Version="2.0.0" />
+    <PackageReference Include="Discord.Net.WebSocket" Version="2.0.0" />
   </ItemGroup>
 
 </Project>
