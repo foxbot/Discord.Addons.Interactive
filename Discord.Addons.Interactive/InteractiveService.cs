@@ -15,13 +15,15 @@ namespace Discord.Addons.Interactive
         private Dictionary<ulong, IReactionCallback> _callbacks;
         private TimeSpan _defaultTimeout;
 
-        public InteractiveService(BaseSocketClient discord, TimeSpan? defaultTimeout = null)
+        public InteractiveService(BaseSocketClient discord, InteractiveServiceConfig config = null)
         {
             Discord = discord;
             Discord.ReactionAdded += HandleReactionAsync;
 
+            config = config ?? new InteractiveServiceConfig();
+            _defaultTimeout = config.DefaultTimeout;
+
             _callbacks = new Dictionary<ulong, IReactionCallback>();
-            _defaultTimeout = defaultTimeout ?? TimeSpan.FromSeconds(15);
         }
 
         public Task<SocketMessage> NextMessageAsync(SocketCommandContext context, 
