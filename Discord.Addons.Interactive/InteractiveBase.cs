@@ -7,11 +7,11 @@ using Discord.WebSocket;
 
 namespace Discord.Addons.Interactive
 {
-    public class InteractiveBase : InteractiveBase<SocketCommandContext>
+    public abstract class InteractiveBase : InteractiveBase<SocketCommandContext>
     {
     }
 
-    public class InteractiveBase<T> : ModuleBase<T>
+    public abstract class InteractiveBase<T> : ModuleBase<T>
         where T : SocketCommandContext
     {
         public InteractiveService Interactive { get; set; }
