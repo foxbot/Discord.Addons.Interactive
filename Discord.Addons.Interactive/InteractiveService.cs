@@ -1,10 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.WebSocket;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Discord.Addons.Interactive
 {
@@ -16,10 +15,13 @@ namespace Discord.Addons.Interactive
         private TimeSpan _defaultTimeout;
 
         // helpers to allow DI containers to resolve without a custom factory
-        public InteractiveService(DiscordSocketClient discord, InteractiveServiceConfig config = null)
-            => new InteractiveService((BaseSocketClient)discord, config);
-        public InteractiveService(DiscordShardedClient discord, InteractiveServiceConfig config = null)
-            => new InteractiveService((BaseSocketClient)discord, config);
+        public InteractiveService(DiscordSocketClient discord, InteractiveServiceConfig config = null) : this((BaseSocketClient)discord, config)
+        {
+        }
+
+        public InteractiveService(DiscordShardedClient discord, InteractiveServiceConfig config = null) : this((BaseSocketClient)discord, config)
+        {
+        }
 
         public InteractiveService(BaseSocketClient discord, InteractiveServiceConfig config = null)
         {
