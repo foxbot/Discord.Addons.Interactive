@@ -4,7 +4,7 @@ namespace Discord.Addons.Interactive
 {
     public class PaginatedMessage
     {
-        public IEnumerable<object> Pages { get; set; }
+        public IEnumerable<PaginatedMessageContent> Pages { get; set; }
 
         public string Content { get; set; } = "";
 
