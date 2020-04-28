@@ -6,6 +6,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Discord.Addons.Interactive;
 using System.Reflection;
+using System.IO;
 
 namespace SampleApp
 {
@@ -20,7 +21,7 @@ namespace SampleApp
 
         public async Task MainAsync()
         {
-            var token = Environment.GetEnvironmentVariable("discord-foxboat-token");
+            var token = File.ReadAllText("token.ignore");
 
             client = new DiscordSocketClient();
 

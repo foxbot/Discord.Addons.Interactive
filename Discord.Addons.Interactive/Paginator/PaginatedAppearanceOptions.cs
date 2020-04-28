@@ -22,6 +22,8 @@ namespace Discord.Addons.Interactive
 
         public TimeSpan? Timeout = null;
         public TimeSpan InfoTimeout = TimeSpan.FromSeconds(30);
+
+        public int FieldsPerPage = 6;
     }
 
     public enum JumpDisplayOptions

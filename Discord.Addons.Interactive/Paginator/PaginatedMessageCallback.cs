@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord.Commands;
@@ -34,6 +35,8 @@ namespace Discord.Addons.Interactive
             _criterion = criterion ?? new EmptyCriterion<SocketReaction>();
             _pager = pager;
             pages = _pager.Pages.Count();
+            if (_pager.Pages is IEnumerable<EmbedFieldBuilder>)
+                pages = ((_pager.Pages.Count() - 1) / options.FieldsPerPage) + 1;
         }
 
         public async Task DisplayAsync()
@@ -130,15 +133,24 @@ namespace Discord.Addons.Interactive
             return false;
         }
         
-        protected Embed BuildEmbed()
+        protected virtual Embed BuildEmbed()
         {
-            return new EmbedBuilder()
+            var builder = new EmbedBuilder()
                 .WithAuthor(_pager.Author)
                 .WithColor(_pager.Color)
-                .WithDescription(_pager.Pages.ElementAt(page-1).ToString())
                 .WithFooter(f => f.Text = string.Format(options.FooterFormat, page, pages))
-                .WithTitle(_pager.Title)
-                .Build();
+                .WithTitle(_pager.Title);
+            if (_pager.Pages is IEnumerable<EmbedFieldBuilder> efb)
+            {
+                builder.Fields = efb.Skip((page - 1) * options.FieldsPerPage).Take(options.FieldsPerPage).ToList();
+                builder.Description = _pager.AlternateDescription;
+            } 
+            else
+            {
+                builder.Description = _pager.Pages.ElementAt(page - 1).ToString();
+            }
+            
+            return builder.Build();
         }
         private async Task RenderAsync()
         {
