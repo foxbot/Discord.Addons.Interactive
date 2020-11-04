@@ -23,9 +23,9 @@ namespace Discord.Addons.Interactive
         private PaginatedAppearanceOptions options => _pager.Options;
         private readonly int pages;
         private int page = 1;
-        
 
-        public PaginatedMessageCallback(InteractiveService interactive, 
+
+        public PaginatedMessageCallback(InteractiveService interactive,
             SocketCommandContext sourceContext,
             PaginatedMessage pager,
             ICriterion<SocketReaction> criterion = null)
@@ -132,7 +132,7 @@ namespace Discord.Addons.Interactive
             await RenderAsync().ConfigureAwait(false);
             return false;
         }
-        
+
         protected virtual Embed BuildEmbed()
         {
             var builder = new EmbedBuilder()
@@ -140,16 +140,44 @@ namespace Discord.Addons.Interactive
                 .WithColor(_pager.Color)
                 .WithFooter(f => f.Text = string.Format(options.FooterFormat, page, pages))
                 .WithTitle(_pager.Title);
+
+            // If type is an EmbedFieldBuilder, add fields and set description
             if (_pager.Pages is IEnumerable<EmbedFieldBuilder> efb)
             {
                 builder.Fields = efb.Skip((page - 1) * options.FieldsPerPage).Take(options.FieldsPerPage).ToList();
                 builder.Description = _pager.AlternateDescription;
-            } 
+            }
+
+            // If type is an embed, copy info from embed
+            else if (_pager.Pages.ElementAt(page - 1).GetType() == typeof(EmbedBuilder))
+            {
+                // Build and then ToEmbedBuilder to prevent the original Embed being modified
+                // TODO: find more efficient way of doing this (storing values then restoring them at the end?)
+                builder = ((EmbedBuilder)_pager.Pages.ElementAt(page - 1)).Build().ToEmbedBuilder();
+                
+                // Check when to set properties to the pager supplied variables
+                if (string.IsNullOrEmpty(builder.Title))
+                    builder.WithTitle(_pager.Title);
+                else
+                {
+                    builder.WithTitle(_pager.Title + "\n" + builder.Title);
+                }
+                if (builder.Author == null)
+                    builder.WithAuthor(_pager.Author);
+                if (builder.Footer == null)
+                    builder.WithFooter(f => f.Text = string.Format(options.FooterFormat, page, pages));
+                else
+                {
+                    builder.WithFooter(f => f.Text = builder.Footer.Text + "\n" + string.Format(options.FooterFormat, page, pages));
+                }
+            }
+
+            // For all other types use the type's own .ToString() function
             else
             {
                 builder.Description = _pager.Pages.ElementAt(page - 1).ToString();
             }
-            
+
             return builder.Build();
         }
         private async Task RenderAsync()
