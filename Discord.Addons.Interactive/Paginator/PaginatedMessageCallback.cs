@@ -149,11 +149,15 @@ namespace Discord.Addons.Interactive
             }
 
             // If type is an embed, copy info from embed
-            else if (_pager.Pages.ElementAt(page - 1).GetType() == typeof(EmbedBuilder))
+            else if (_pager.Pages.ElementAt(page - 1).GetType() == typeof(EmbedBuilder) || _pager.Pages.ElementAt(page - 1).GetType() == typeof(Embed))
             {
                 // Build and then ToEmbedBuilder to prevent the original Embed being modified
                 // TODO: find more efficient way of doing this (storing values then restoring them at the end?)
-                builder = ((EmbedBuilder)_pager.Pages.ElementAt(page - 1)).Build().ToEmbedBuilder();
+                if (_pager.Pages.ElementAt(page - 1).GetType() == typeof(EmbedBuilder))
+                    builder = ((EmbedBuilder)_pager.Pages.ElementAt(page - 1)).Build().ToEmbedBuilder();
+                else if (_pager.Pages.ElementAt(page - 1).GetType() == typeof(Embed))
+                    builder = ((Embed)_pager.Pages.ElementAt(page - 1)).ToEmbedBuilder();
+
                 
                 // Check when to set properties to the pager supplied variables
                 if (string.IsNullOrEmpty(builder.Title))
@@ -171,6 +175,8 @@ namespace Discord.Addons.Interactive
                     builder.WithFooter(f => f.Text = builder.Footer.Text + "\n" + string.Format(options.FooterFormat, page, pages));
                 }
             }
+
+
 
             // For all other types use the type's own .ToString() function
             else
