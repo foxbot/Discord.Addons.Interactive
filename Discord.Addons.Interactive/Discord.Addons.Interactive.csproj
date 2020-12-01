@@ -14,7 +14,7 @@
     <VersionPrefix Condition=" '$(Version)' != '' ">$(Version)</VersionPrefix>
     <VersionPrefix Condition=" '$(Version)' == '' ">0.0.0-dev</VersionPrefix>
 
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
