@@ -41,8 +41,23 @@ namespace Discord.Addons.Interactive
 
         public async Task DisplayAsync()
         {
-            var embed = BuildEmbed();
-            var message = await Context.Channel.SendMessageAsync(_pager.Content, embed: embed).ConfigureAwait(false);
+            Rest.RestUserMessage message;
+            if (_pager.ForceSendAsEmbed)
+            {
+                var embed = BuildEmbed();
+                message = await Context.Channel.SendMessageAsync(_pager.Content, embed: embed).ConfigureAwait(false);
+            }
+            else try
+                {
+                    var content = Convert.ToString(_pager.Pages.ElementAt(page - 1));
+                    message = await Context.Channel.SendMessageAsync(content).ConfigureAwait(false);
+                }
+                catch (Exception)
+                {
+                    var embed = BuildEmbed();
+                    message = await Context.Channel.SendMessageAsync(_pager.Content, embed: embed).ConfigureAwait(false);
+                }
+
             Message = message;
             Interactive.AddReactionCallback(message, this);
             // Reactions take a while to add, don't wait for them
@@ -135,7 +150,9 @@ namespace Discord.Addons.Interactive
 
         protected virtual Embed BuildEmbed()
         {
-            var builder = new EmbedBuilder()
+            var builder = new EmbedBuilder();
+            if (_pager.Prettify)
+                builder
                 .WithAuthor(_pager.Author)
                 .WithColor(_pager.Color)
                 .WithFooter(f => f.Text = string.Format(options.FooterFormat, page, pages))
@@ -158,20 +175,24 @@ namespace Discord.Addons.Interactive
                 else if (_pager.Pages.ElementAt(page - 1).GetType() == typeof(Embed))
                     builder = ((Embed)_pager.Pages.ElementAt(page - 1)).ToEmbedBuilder();
 
-                // Check when to set properties to the pager supplied variables
-                if (string.IsNullOrEmpty(builder.Title))
-                    builder.WithTitle(_pager.Title);
-                else
+                // Check when to set properties to the pager supplied variables if needed
+
+                if (_pager.Prettify)
                 {
-                    builder.WithTitle(_pager.Title + "\n" + builder.Title);
-                }
-                if (builder.Author == null)
-                    builder.WithAuthor(_pager.Author);
-                if (builder.Footer == null)
-                    builder.WithFooter(f => f.Text = string.Format(options.FooterFormat, page, pages));
-                else
-                {
-                    builder.WithFooter(f => f.Text = builder.Footer.Text + "\n" + string.Format(options.FooterFormat, page, pages));
+                    if (string.IsNullOrEmpty(builder.Title))
+                        builder.WithTitle(_pager.Title);
+                    else
+                    {
+                        builder.WithTitle(_pager.Title + "\n" + builder.Title);
+                    }
+                    if (builder.Author == null)
+                        builder.WithAuthor(_pager.Author);
+                    if (builder.Footer == null)
+                        builder.WithFooter(f => f.Text = string.Format(options.FooterFormat, page, pages));
+                    else
+                    {
+                        builder.WithFooter(f => f.Text = builder.Footer.Text + "\n" + string.Format(options.FooterFormat, page, pages));
+                    }
                 }
             }
 
@@ -185,8 +206,21 @@ namespace Discord.Addons.Interactive
         }
         private async Task RenderAsync()
         {
-            var embed = BuildEmbed();
-            await Message.ModifyAsync(m => m.Embed = embed).ConfigureAwait(false);
+            if (_pager.ForceSendAsEmbed)
+            {
+                var embed = BuildEmbed();
+                await Message.ModifyAsync(m => m.Embed = embed).ConfigureAwait(false);
+            }
+            else try
+                {
+                    var content = Convert.ToString(_pager.Pages.ElementAt(page - 1));
+                    await Message.ModifyAsync(m => m.Content = content).ConfigureAwait(false);
+                }
+                catch (Exception)
+                {
+                    var embed = BuildEmbed();
+                    await Message.ModifyAsync(m => m.Embed = embed).ConfigureAwait(false);
+                }
         }
     }
 }
