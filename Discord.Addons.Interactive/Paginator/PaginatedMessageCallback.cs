@@ -158,7 +158,6 @@ namespace Discord.Addons.Interactive
                 else if (_pager.Pages.ElementAt(page - 1).GetType() == typeof(Embed))
                     builder = ((Embed)_pager.Pages.ElementAt(page - 1)).ToEmbedBuilder();
 
-                
                 // Check when to set properties to the pager supplied variables
                 if (string.IsNullOrEmpty(builder.Title))
                     builder.WithTitle(_pager.Title);
@@ -175,8 +174,6 @@ namespace Discord.Addons.Interactive
                     builder.WithFooter(f => f.Text = builder.Footer.Text + "\n" + string.Format(options.FooterFormat, page, pages));
                 }
             }
-
-
 
             // For all other types use the type's own .ToString() function
             else
