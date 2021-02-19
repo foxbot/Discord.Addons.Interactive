@@ -23,9 +23,9 @@ namespace Discord.Addons.Interactive
         private PaginatedAppearanceOptions options => _pager.Options;
         private readonly int pages;
         private int page = 1;
-        
 
-        public PaginatedMessageCallback(InteractiveService interactive, 
+
+        public PaginatedMessageCallback(InteractiveService interactive,
             SocketCommandContext sourceContext,
             PaginatedMessage pager,
             ICriterion<SocketReaction> criterion = null)
@@ -41,8 +41,23 @@ namespace Discord.Addons.Interactive
 
         public async Task DisplayAsync()
         {
-            var embed = BuildEmbed();
-            var message = await Context.Channel.SendMessageAsync(_pager.Content, embed: embed).ConfigureAwait(false);
+            Rest.RestUserMessage message;
+            if (_pager.ForceSendAsEmbed || _pager.Pages.ElementAt(page - 1).GetType() == typeof(EmbedBuilder) || _pager.Pages.ElementAt(page - 1).GetType() == typeof(Embed))
+            {
+                var embed = BuildEmbed();
+                message = await Context.Channel.SendMessageAsync(_pager.Content, embed: embed).ConfigureAwait(false);
+            }
+            else try
+                {
+                    var content = Convert.ToString(_pager.Pages.ElementAt(page - 1));
+                    message = await Context.Channel.SendMessageAsync(content).ConfigureAwait(false);
+                }
+                catch (Exception)
+                {
+                    var embed = BuildEmbed();
+                    message = await Context.Channel.SendMessageAsync(_pager.Content, embed: embed).ConfigureAwait(false);
+                }
+
             Message = message;
             Interactive.AddReactionCallback(message, this);
             // Reactions take a while to add, don't wait for them
@@ -132,30 +147,80 @@ namespace Discord.Addons.Interactive
             await RenderAsync().ConfigureAwait(false);
             return false;
         }
-        
+
         protected virtual Embed BuildEmbed()
         {
-            var builder = new EmbedBuilder()
+            var builder = new EmbedBuilder();
+            if (_pager.Prettify)
+                builder
                 .WithAuthor(_pager.Author)
                 .WithColor(_pager.Color)
                 .WithFooter(f => f.Text = string.Format(options.FooterFormat, page, pages))
                 .WithTitle(_pager.Title);
+
+            // If type is an EmbedFieldBuilder, add fields and set description
             if (_pager.Pages is IEnumerable<EmbedFieldBuilder> efb)
             {
                 builder.Fields = efb.Skip((page - 1) * options.FieldsPerPage).Take(options.FieldsPerPage).ToList();
                 builder.Description = _pager.AlternateDescription;
-            } 
+            }
+
+            // If type is an embed, copy info from embed
+            else if (_pager.Pages.ElementAt(page - 1).GetType() == typeof(EmbedBuilder) || _pager.Pages.ElementAt(page - 1).GetType() == typeof(Embed))
+            {
+                // Build and then ToEmbedBuilder to prevent the original Embed being modified
+                // TODO: find more efficient way of doing this (storing values then restoring them at the end?)
+                if (_pager.Pages.ElementAt(page - 1).GetType() == typeof(EmbedBuilder))
+                    builder = ((EmbedBuilder)_pager.Pages.ElementAt(page - 1)).Build().ToEmbedBuilder();
+                else if (_pager.Pages.ElementAt(page - 1).GetType() == typeof(Embed))
+                    builder = ((Embed)_pager.Pages.ElementAt(page - 1)).ToEmbedBuilder();
+
+                // Check when to set properties to the pager supplied variables if needed
+
+                if (_pager.Prettify)
+                {
+                    if (string.IsNullOrEmpty(builder.Title))
+                        builder.WithTitle(_pager.Title);
+                    else
+                    {
+                        builder.WithTitle(_pager.Title + "\n" + builder.Title);
+                    }
+                    if (builder.Author == null)
+                        builder.WithAuthor(_pager.Author);
+                    if (builder.Footer == null)
+                        builder.WithFooter(f => f.Text = string.Format(options.FooterFormat, page, pages));
+                    else
+                    {
+                        builder.WithFooter(f => f.Text = builder.Footer.Text + "\n" + string.Format(options.FooterFormat, page, pages));
+                    }
+                }
+            }
+
+            // For all other types use the type's own .ToString() function
             else
             {
                 builder.Description = _pager.Pages.ElementAt(page - 1).ToString();
             }
-            
+
             return builder.Build();
         }
         private async Task RenderAsync()
         {
-            var embed = BuildEmbed();
-            await Message.ModifyAsync(m => m.Embed = embed).ConfigureAwait(false);
+            if (_pager.ForceSendAsEmbed)
+            {
+                var embed = BuildEmbed();
+                await Message.ModifyAsync(m => { m.Content = null; m.Embed = embed; }).ConfigureAwait(false);
+            }
+            else try
+                {
+                    var content = Convert.ToString(_pager.Pages.ElementAt(page - 1));
+                    await Message.ModifyAsync(m => { m.Content = content; m.Embed = null; }).ConfigureAwait(false);
+                }
+                catch (Exception)
+                {
+                    var embed = BuildEmbed();
+                    await Message.ModifyAsync(m => { m.Content = null; m.Embed = embed; }).ConfigureAwait(false);
+                }
         }
     }
 }
