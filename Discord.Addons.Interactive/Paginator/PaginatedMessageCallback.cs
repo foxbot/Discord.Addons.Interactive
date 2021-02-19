@@ -42,7 +42,7 @@ namespace Discord.Addons.Interactive
         public async Task DisplayAsync()
         {
             Rest.RestUserMessage message;
-            if (_pager.ForceSendAsEmbed)
+            if (_pager.ForceSendAsEmbed || _pager.Pages.ElementAt(page - 1).GetType() == typeof(EmbedBuilder) || _pager.Pages.ElementAt(page - 1).GetType() == typeof(Embed))
             {
                 var embed = BuildEmbed();
                 message = await Context.Channel.SendMessageAsync(_pager.Content, embed: embed).ConfigureAwait(false);
@@ -209,17 +209,17 @@ namespace Discord.Addons.Interactive
             if (_pager.ForceSendAsEmbed)
             {
                 var embed = BuildEmbed();
-                await Message.ModifyAsync(m => m.Embed = embed).ConfigureAwait(false);
+                await Message.ModifyAsync(m => { m.Content = null; m.Embed = embed; }).ConfigureAwait(false);
             }
             else try
                 {
                     var content = Convert.ToString(_pager.Pages.ElementAt(page - 1));
-                    await Message.ModifyAsync(m => m.Content = content).ConfigureAwait(false);
+                    await Message.ModifyAsync(m => { m.Content = content; m.Embed = null; }).ConfigureAwait(false);
                 }
                 catch (Exception)
                 {
                     var embed = BuildEmbed();
-                    await Message.ModifyAsync(m => m.Embed = embed).ConfigureAwait(false);
+                    await Message.ModifyAsync(m => { m.Content = null; m.Embed = embed; }).ConfigureAwait(false);
                 }
         }
     }
