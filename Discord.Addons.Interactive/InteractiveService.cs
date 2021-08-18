@@ -112,8 +112,8 @@ namespace Discord.Addons.Interactive
         public void ClearReactionCallbacks()
             => _callbacks.Clear();
         
-        private async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> message, 
-            ISocketMessageChannel channel, 
+        private async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> message,
+            Cacheable<IMessageChannel, ulong> channel, 
             SocketReaction reaction)
         {
             if (reaction.UserId == Discord.CurrentUser.Id) return;
