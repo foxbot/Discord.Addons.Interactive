@@ -7,19 +7,24 @@ using Discord.WebSocket;
 
 namespace Discord.Addons.Interactive
 {
-    public class InteractiveService : IDisposable
+    public class InteractiveService
+        : IDisposable
     {
         public BaseSocketClient Discord { get; }
 
-        private Dictionary<ulong, IReactionCallback> _callbacks;
-        private TimeSpan _defaultTimeout;
+        private readonly Dictionary<ulong, IReactionCallback> _callbacks;
+        private readonly TimeSpan _defaultTimeout;
 
         // helpers to allow DI containers to resolve without a custom factory
         public InteractiveService(DiscordSocketClient discord, InteractiveServiceConfig config = null)
-            : this((BaseSocketClient)discord, config) {}
-            
+            : this((BaseSocketClient)discord, config)
+        {
+        }
+
         public InteractiveService(DiscordShardedClient discord, InteractiveServiceConfig config = null)
-            : this((BaseSocketClient)discord, config) {}
+            : this((BaseSocketClient)discord, config)
+        {
+        }
 
         public InteractiveService(BaseSocketClient discord, InteractiveServiceConfig config = null)
         {
@@ -32,24 +37,27 @@ namespace Discord.Addons.Interactive
             _callbacks = new Dictionary<ulong, IReactionCallback>();
         }
 
-        public Task<SocketMessage> NextMessageAsync(SocketCommandContext context, 
+        public Task<SocketMessage> NextMessageAsync(
+            SocketCommandContext context, 
             bool fromSourceUser = true, 
             bool inSourceChannel = true, 
             TimeSpan? timeout = null,
-            CancellationToken token = default(CancellationToken))
+            CancellationToken token = default)
         {
             var criterion = new Criteria<SocketMessage>();
             if (fromSourceUser)
                 criterion.AddCriterion(new EnsureSourceUserCriterion());
             if (inSourceChannel)
                 criterion.AddCriterion(new EnsureSourceChannelCriterion());
+
             return NextMessageAsync(context, criterion, timeout, token);
         }
         
-        public async Task<SocketMessage> NextMessageAsync(SocketCommandContext context, 
+        public async Task<SocketMessage> NextMessageAsync(
+            SocketCommandContext context, 
             ICriterion<SocketMessage> criterion, 
             TimeSpan? timeout = null,
-            CancellationToken token = default(CancellationToken))
+            CancellationToken token = default)
         {
             timeout = timeout ?? _defaultTimeout;
 
@@ -103,17 +111,17 @@ namespace Discord.Addons.Interactive
             return callback.Message;
         }
 
-        public void AddReactionCallback(IMessage message, IReactionCallback callback)
-            => _callbacks[message.Id] = callback;
-        public void RemoveReactionCallback(IMessage message)
-            => RemoveReactionCallback(message.Id);
-        public void RemoveReactionCallback(ulong id)
-            => _callbacks.Remove(id);
-        public void ClearReactionCallbacks()
-            => _callbacks.Clear();
+        public void AddReactionCallback(IMessage message, IReactionCallback callback) => _callbacks[message.Id] = callback;
+
+        public void RemoveReactionCallback(IMessage message) => RemoveReactionCallback(message.Id);
+
+        public void RemoveReactionCallback(ulong id) => _callbacks.Remove(id);
+
+        public void ClearReactionCallbacks() => _callbacks.Clear();
         
-        private async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> message, 
-            ISocketMessageChannel channel, 
+        private async Task HandleReactionAsync(
+            Cacheable<IUserMessage, ulong> message, 
+            Cacheable<IMessageChannel, ulong> cacheable, 
             SocketReaction reaction)
         {
             if (reaction.UserId == Discord.CurrentUser.Id) return;
